@@ -1,0 +1,50 @@
+/* @xeplr/ui-canvas — the shared canvas.
+   Colours come from the xeplr theme variables, with fallbacks, so a builder
+   restyles by theme rather than by overriding these. */
+
+.xeplr-canvas { position: relative; overflow: auto; }
+.xeplr-canvas-inner { position: relative; min-width: 100%; min-height: 100%; }
+.xeplr-canvas-item { position: absolute; box-sizing: border-box; }
+
+/* ── Edges ────────────────────────────────────────────────────────────── */
+.xeplr-canvas-edges { position: absolute; top: 0; left: 0; pointer-events: none; overflow: visible; }
+.xeplr-canvas-edge { fill: none; stroke: var(--xeplr-border-strong, #cfcec4); stroke-width: 2; }
+.xeplr-canvas-edge--dashed { stroke-dasharray: 6 5; }
+.xeplr-canvas-edge-arrow { fill: var(--xeplr-border-strong, #cfcec4); }
+
+/* ── Alignment guides ─────────────────────────────────────────────────
+   Drawn only while a drag is snapping to them. Without these an item
+   jumping four pixels looks like a bug rather than an alignment. */
+.xeplr-canvas-guide { position: absolute; z-index: 9000; pointer-events: none; background: var(--xeplr-accent, #4f5fd6); }
+.xeplr-canvas-guide-x { top: 0; bottom: 0; width: 1px; }
+.xeplr-canvas-guide-y { left: 0; right: 0; height: 1px; }
+
+/* ── Resize handles ───────────────────────────────────────────────────── */
+.xeplr-canvas-handle {
+  position: absolute; width: 9px; height: 9px; z-index: 10;
+  background: var(--xeplr-surface, #fff);
+  border: 1px solid var(--xeplr-accent, #4f5fd6);
+  border-radius: 2px;
+}
+.xeplr-canvas-handle-nw { left: -5px; top: -5px; cursor: nwse-resize; }
+.xeplr-canvas-handle-n { left: calc(50% - 4px); top: -5px; cursor: ns-resize; }
+.xeplr-canvas-handle-ne { right: -5px; top: -5px; cursor: nesw-resize; }
+.xeplr-canvas-handle-w { left: -5px; top: calc(50% - 4px); cursor: ew-resize; }
+.xeplr-canvas-handle-e { right: -5px; top: calc(50% - 4px); cursor: ew-resize; }
+.xeplr-canvas-handle-sw { left: -5px; bottom: -5px; cursor: nesw-resize; }
+.xeplr-canvas-handle-s { left: calc(50% - 4px); bottom: -5px; cursor: ns-resize; }
+.xeplr-canvas-handle-se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+
+/* THE MARQUEE BAND. pointer-events:none so the sweep it is drawing cannot be
+   interrupted by the thing drawing it. Above the items, below the alignment
+   guides — a guide that appears mid-sweep is still the more important mark. */
+.xeplr-canvas-marquee {
+  position: absolute; z-index: 8800; pointer-events: none;
+  border: 1px solid var(--xeplr-accent, #4f5fd6);
+  background: color-mix(in srgb, var(--xeplr-accent, #4f5fd6) 12%, transparent);
+}
+
+/* While a marquee is being swept. Text inside an item — a table's cells, a
+   label — is part of its rendering, not something the canvas selects, and a
+   drag across it must not leave a trail of highlighted rows behind. */
+body.xeplr-canvas-sweeping, body.xeplr-canvas-sweeping * { user-select: none; -webkit-user-select: none; }

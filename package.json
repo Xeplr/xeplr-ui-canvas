@@ -1,0 +1,47 @@
+{
+  "name": "@xeplr/ui-canvas",
+  "version": "1.0.0",
+  "description": "One free-placement canvas for every xeplr builder: drag, resize, alignment guides, snapping, marquee select and edges — React controller hooks, pure geometry and a ready-made <XeplrCanvas>",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./geometry": "./src/geometry.js",
+    "./edges": "./src/edges.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src/"
+  ],
+  "scripts": {
+    "test": "for f in test/*.test.js; do node \"$f\" || exit 1; done"
+  },
+  "keywords": [
+    "canvas",
+    "drag",
+    "resize",
+    "snapping",
+    "alignment-guides",
+    "marquee",
+    "flow-editor",
+    "react",
+    "builder",
+    "xeplr"
+  ],
+  "author": "xeplr",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Xeplr/xeplr-ui-canvas"
+  },
+  "homepage": "https://github.com/Xeplr/xeplr-ui-canvas#readme",
+  "bugs": {
+    "url": "https://github.com/Xeplr/xeplr-ui-canvas/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0"
+  }
+}
