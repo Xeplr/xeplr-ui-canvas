@@ -27,7 +27,7 @@ export function useCanvasController(props) {
   const {
     items, units = 'px', features, edges, selection,
     onItemClick, onRaise, minSizeFor,
-    padding, minWidth = 0, minHeight = 0
+    padding, minWidth = 0, minHeight = 0, pageAspect
   } = props
   // onItemChange and onSelectionChange are read through propsRef below, so a
   // new inline handler from the caller never rebuilds the gestures.
@@ -35,9 +35,16 @@ export function useCanvasController(props) {
   const f = useMemo(() => ({ ...DEFAULT_FEATURES, ...features }), [features])
   const fraction = units === 'fraction'
 
-  // Measured only for a fractional canvas, where a page IS the visible size.
+  // Measured only for a fractional canvas. A page is the visible size — or,
+  // with pageAspect, the WIDTH times pageAspect, so a layout keeps its
+  // proportions wherever it is shown instead of depending on how tall the
+  // wrapper happens to be.
   const [measured, measureRef] = useCanvasSize()
-  const canvas = fraction ? measured : null
+  const canvas = useMemo(() => {
+    if (!fraction || !measured) return null
+    if (!(pageAspect > 0)) return measured
+    return { width: measured.width, height: measured.width * pageAspect }
+  }, [fraction, measured, pageAspect])
   const canvasRef = useRef(canvas); canvasRef.current = canvas
   const rootRef = useRef(null)
 

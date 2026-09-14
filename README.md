@@ -90,6 +90,7 @@ Edges follow their node **while** it is being dragged, not only after the drop.
 | `items` | `Array<{ id, x, y, w, h, z?, groupId? }>` | required | `z` sets paint order |
 | `renderItem` | `(item, { selected }) => ReactNode` | required | the item's content; the canvas positions it |
 | `units` | `'px' \| 'fraction'` | `'px'` | see above |
+| `pageAspect` | number | — | fraction units only: one page is `width × pageAspect` tall instead of the visible height, so a layout keeps the same proportions at any size |
 | `features` | `{ drag, resize, snap, grid, marquee }` | `{ drag: true, resize: false, snap: true, grid: 10, marquee: false }` | merged over the defaults |
 | `onItemChange` | `(id, patch) => void` | — | once per item, on drop, in the item's own units |
 | `onItemClick` | `(id, event) => void` | — | a press that moved less than 4px |

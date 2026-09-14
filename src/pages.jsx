@@ -26,6 +26,9 @@ import { CanvasSample } from './designs/index.js'
  * @prop edgeMinOffset    minimum sideways reach of an edge's curve, px (default 60)
  * @prop padding          room beyond the furthest item: number or { x, y }
  * @prop minWidth, minHeight  the smallest the inner canvas gets
+ * @prop pageAspect       fraction units only: a page is width × pageAspect tall,
+ *                        instead of the visible height — proportions then hold
+ *                        at any size
  * @prop underlay, overlay    extra layers under the edges / over everything
  * @prop className, style     on the scrolling wrapper
  */
