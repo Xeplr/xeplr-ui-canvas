@@ -18,6 +18,9 @@ export { validateCanvasProps } from './validateCanvas.js'
 
 // Controllers
 export { useCanvasDrag, ITEM_ID_ATTR } from './useCanvasDrag.js'
+// The drag's own rule about which presses are not drags — exported so a
+// consumer can ask it too, rather than keeping a second copy of the list.
+export { NOT_A_DRAG, startsADrag } from './press.js'
 export { useMarquee, SWEEPING_CLASS } from './useMarquee.js'
 export { useCanvasSize } from './useCanvasSize.js'
 export { useCanvasController, DEFAULT_FEATURES } from './useCanvasController.js'

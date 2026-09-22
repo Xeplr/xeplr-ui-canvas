@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useRef } from 'react'
 import { moveRect, resizeRect, pixelRect, GRID } from './geometry.js'
 import { createFrameStore } from './frameStore.js'
+import { NOT_A_DRAG } from './press.js'
 
 // Dragging and resizing on a canvas. The geometry is in geometry.js; this owns
 // only the pointer lifecycle.
@@ -95,10 +96,13 @@ export function useCanvasDrag({
   }, [items, store])
 
   const begin = useCallback((e, ids, mode, handle) => {
-    // Only the primary button, and never through a button inside the item —
-    // a Remove control can sit in the drag handle.
+    // Only the primary button, and never through a control inside the item —
+    // a Remove button can sit in the drag handle, and so can the field that
+    // names the item. The preventDefault below is what takes the press for
+    // the drag, and for a field that same default is the focus; press.js has
+    // the list and the reasoning.
     if (e.button !== 0) return
-    if (e.target.closest && e.target.closest('button')) return
+    if (e.target.closest && e.target.closest(NOT_A_DRAG)) return
     e.preventDefault()
     e.stopPropagation()
 

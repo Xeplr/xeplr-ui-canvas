@@ -145,6 +145,20 @@ Like every `@xeplr/ui-*` package, it is split into model, controller and design,
    import { bezierPath, anchorOf } from '@xeplr/ui-canvas/edges'
    ```
 
+## Controls inside an item
+
+An item can hold real controls — the field that names it, a dropdown, a Remove button. A press that lands on one of those belongs to the control, and the drag leaves it alone:
+
+```js
+import { NOT_A_DRAG, startsADrag } from '@xeplr/ui-canvas'
+// NOT_A_DRAG  → 'button, input, select, textarea, label, a[href], [contenteditable=…], [data-canvas-no-drag]'
+// startsADrag(e.target) → false when the press belongs to a control
+```
+
+This matters more than it looks. Starting a drag means calling `preventDefault()` on the mousedown, and for a field that default IS the focus — so a text input in an item used to take no caret, and the item read as *unresponsive* rather than as *dragged*. Nothing about the press said which. The list was `button` alone; now it covers every control, and `data-canvas-no-drag` on a wrapper opts out anything it has not thought of.
+
+Your own design can ask the same question rather than keeping a second copy of the list — `startsADrag(e.target)` before treating a press as a grab.
+
 ## Styling
 
 Everything is namespaced `.xeplr-canvas-*`, and colours come from the xeplr theme variables with fallbacks: `--xeplr-accent` for guides, handles and the marquee, and `--xeplr-border-strong` for edges. Set those variables to restyle, or override the classes:
@@ -165,6 +179,7 @@ Everything is namespaced `.xeplr-canvas-*`, and colours come from the xeplr them
 - **Designs:** `CanvasSample`, `DragGuides`, `MarqueeBox`, `ResizeHandles`, `EdgeLayer`
 - **Geometry:** `moveRect`, `resizeRect`, `rectOf`, `pixelRect`, `canvasBounds`, `bringToFront`, `inStackOrder`, `toFraction`, `toPixels`, `hits`, `overlaps`, `RESIZE_HANDLES`, `GRID`, `SNAP_TOLERANCE`, `MIN_WIDTH`, `MIN_HEIGHT`, `DEFAULT_SIZE`, `DEFAULT_FRACTION`
 - **Edges:** `bezierPath`, `anchorOf`, `midpoint`, `edgeEnds`
+- **Presses:** `NOT_A_DRAG`, `startsADrag`
 - **Other:** `createFrameStore`, `validateCanvasProps`, `DEFAULT_FEATURES`, `ITEM_ID_ATTR`, `SWEEPING_CLASS`
 
 ## Files
@@ -179,6 +194,7 @@ src/
   validateCanvas.js        ─ loud failure on a mis-wired canvas
   useCanvasController.js   ─ features, selection, groups
   useCanvasDrag.js         ─ drag and resize pointer lifecycle
+  press.js                 ─ which presses belong to a control, not the canvas
   useMarquee.js            ─ marquee select
   useCanvasSize.js         ─ measured canvas size
   designs/
@@ -192,7 +208,7 @@ src/
 npm test
 ```
 
-Geometry, snapping, resize limits, fractions, marquee hits and edge paths are covered by plain Node scripts, with no test framework.
+Geometry, snapping, resize limits, fractions, marquee hits and edge paths are covered by plain Node scripts, with no test framework. `press.js` is tested the same way — it is deliberately React-free so it can be.
 
 ## License
 
