@@ -1,6 +1,6 @@
 {
   "name": "@xeplr/ui-canvas",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "One free-placement canvas for every xeplr builder: drag, resize, alignment guides, snapping, marquee select and edges — React controller hooks, pure geometry and a ready-made <XeplrCanvas>",
   "type": "module",
   "main": "src/index.js",
