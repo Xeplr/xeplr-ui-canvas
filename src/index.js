@@ -9,7 +9,7 @@
 // Model
 export {
   MIN_WIDTH, MIN_HEIGHT, SNAP_TOLERANCE, GRID, DEFAULT_SIZE, DEFAULT_FRACTION, RESIZE_HANDLES,
-  rectOf, pixelRect, moveRect, resizeRect, canvasBounds, bringToFront, inStackOrder,
+  rectOf, pixelRect, moveRect, resizeRect, canvasBounds, bringToFront, restack, STACK_MOVES, inStackOrder,
   toFraction, toPixels, hits, overlaps
 } from './geometry.js'
 export { anchorOf, bezierPath, midpoint, edgeEnds } from './edges.js'

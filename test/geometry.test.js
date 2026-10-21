@@ -6,7 +6,7 @@
 // you meant it and stay out of the way when you didn't.
 import { GRID,
   moveRect, resizeRect, rectOf, canvasBounds,
-  bringToFront, inStackOrder, MIN_WIDTH, MIN_HEIGHT, SNAP_TOLERANCE,
+  bringToFront, restack, STACK_MOVES, inStackOrder, MIN_WIDTH, MIN_HEIGHT, SNAP_TOLERANCE,
   toFraction, toPixels, DEFAULT_FRACTION, hits
 } from '../src/geometry.js'
 import { anchorOf, bezierPath, midpoint, edgeEnds } from '../src/edges.js'
@@ -188,6 +188,20 @@ console.log('\nstacking')
   check('z values stay small',
     Math.max(...bringToFront([{ id: 'a', z: 9999 }, { id: 'b', z: 5 }], 'b').map((w) => w.z)) === 1)
   check('raising something absent changes nothing', bringToFront(list, 'zzz').length === 3)
+
+  // The four moves a person asks for — nothing restacks on its own.
+  const order = (out) => [...out].sort((x, y) => x.z - y.z).map((w) => w.id).join()
+  const four = [{ id: 'a', z: 0 }, { id: 'b', z: 1 }, { id: 'c', z: 2 }, { id: 'd', z: 3 }]
+  check('the moves', STACK_MOVES.join() === 'front,forward,backward,back')
+  check('to the front', order(restack(four, 'b', 'front')) === 'a,c,d,b')
+  check('one step forward', order(restack(four, 'b', 'forward')) === 'a,c,b,d')
+  check('one step backward', order(restack(four, 'c', 'backward')) === 'a,c,b,d')
+  check('to the back', order(restack(four, 'c', 'back')) === 'c,a,b,d')
+  check('forward from the top changes nothing', order(restack(four, 'd', 'forward')) === 'a,b,c,d')
+  check('backward from the bottom changes nothing', order(restack(four, 'a', 'backward')) === 'a,b,c,d')
+  check('items come back in the order given', restack(four, 'b', 'front').map((w) => w.id).join() === 'a,b,c,d')
+  check('an unknown move changes nothing', restack(four, 'b', 'sideways') === four)
+  check('equal z values keep the order given', order(restack([{ id: 'x' }, { id: 'y' }, { id: 'z' }], 'z', 'backward')) === 'x,z,y')
 }
 check('paint order is by z',
   inStackOrder([{ id: 'a', z: 2 }, { id: 'b', z: 0 }]).map((w) => w.id).join() === 'b,a')

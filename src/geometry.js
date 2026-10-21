@@ -243,20 +243,41 @@ export function canvasBounds(rects, padding) {
   return { width: width + padX, height: height + padY }
 }
 
+/** The stacking moves `restack` takes. */
+export const STACK_MOVES = ['front', 'forward', 'backward', 'back']
+
 /**
- * Raises `id` above the rest.
+ * `id` moved in the stacking order: to the `front`, one step `forward`, one
+ * step `backward`, or to the `back`. The others keep their order.
  *
  * Renumbered from zero rather than "max + 1" so z never climbs forever — a
  * board that is rearranged for a year would otherwise carry meaningless
  * five-digit z values, and their ORDER is the only thing that matters.
+ *
+ * Items come back in the order they were given, each with its new z. An id
+ * not in the list, or a move it cannot make (forward when already on top),
+ * changes nothing.
  */
+export function restack(items, id, move) {
+  const list = items || []
+  const order = list.map((item, i) => ({ item, i }))
+    .sort((a, b) => ((a.item.z || 0) - (b.item.z || 0)) || (a.i - b.i))
+    .map((x) => x.item)
+  const at = order.findIndex((item) => item.id === id)
+  if (at < 0 || STACK_MOVES.indexOf(move) < 0) return list
+  const [target] = order.splice(at, 1)
+  const to = move === 'front' ? order.length
+    : move === 'back' ? 0
+      : move === 'forward' ? Math.min(order.length, at + 1)
+        : Math.max(0, at - 1)
+  order.splice(to, 0, target)
+  const z = new Map(order.map((item, i) => [item.id, i]))
+  return list.map((item) => ({ ...item, z: z.get(item.id) }))
+}
+
+/** Raises `id` above the rest — `restack(items, id, 'front')`. */
 export function bringToFront(items, id) {
-  const others = (items || []).filter((item) => item.id !== id)
-  const target = (items || []).find((item) => item.id === id)
-  if (!target) return items || []
-  const ordered = [...others].sort((a, b) => (a.z || 0) - (b.z || 0))
-  const renumbered = ordered.map((item, i) => ({ ...item, z: i }))
-  return [...renumbered, { ...target, z: renumbered.length }]
+  return restack(items, id, 'front')
 }
 
 /** Items in paint order — the one on top renders last. */

@@ -94,7 +94,7 @@ Edges follow their node **while** it is being dragged, not only after the drop.
 | `features` | `{ drag, resize, snap, grid, marquee }` | `{ drag: true, resize: false, snap: true, grid: 10, marquee: false }` | merged over the defaults |
 | `onItemChange` | `(id, patch) => void` | — | once per item, on drop, in the item's own units |
 | `onItemClick` | `(id, event) => void` | — | a press that moved less than 4px |
-| `onRaise` | `(id) => void` | — | when an item is grabbed — e.g. `bringToFront` |
+| `onRaise` | `(id) => void` | — | when an item is grabbed — e.g. `bringToFront`. Leave it out when the stacking order should change only when somebody asks (`restack`): raising on every press reorders items as a side effect of selecting one, which nobody sees happen. The BI dashboard leaves it out. |
 | `selection` | `Array<id> \| Set<id>` | — | controlled selection; omit to let the canvas own it |
 | `onSelectionChange` | `(Set<id>) => void` | — | |
 | `minSizeFor` | `(item) => { minWidth, minHeight }` | 48 × 28 | per-item resize floor |
@@ -177,7 +177,7 @@ Everything is namespaced `.xeplr-canvas-*`, and colours come from the xeplr them
 - **Component:** `XeplrCanvas`
 - **Hooks:** `useCanvasController`, `useCanvasDrag`, `useMarquee`, `useCanvasSize`
 - **Designs:** `CanvasSample`, `DragGuides`, `MarqueeBox`, `ResizeHandles`, `EdgeLayer`
-- **Geometry:** `moveRect`, `resizeRect`, `rectOf`, `pixelRect`, `canvasBounds`, `bringToFront`, `inStackOrder`, `toFraction`, `toPixels`, `hits`, `overlaps`, `RESIZE_HANDLES`, `GRID`, `SNAP_TOLERANCE`, `MIN_WIDTH`, `MIN_HEIGHT`, `DEFAULT_SIZE`, `DEFAULT_FRACTION`
+- **Geometry:** `moveRect`, `resizeRect`, `rectOf`, `pixelRect`, `canvasBounds`, `restack(items, id, move)` (move one item `front`, `forward`, `backward` or `back`; the others keep their order; z renumbered from 0; `STACK_MOVES`), `bringToFront` (= `restack(…, 'front')`), `inStackOrder`, `toFraction`, `toPixels`, `hits`, `overlaps`, `RESIZE_HANDLES`, `GRID`, `SNAP_TOLERANCE`, `MIN_WIDTH`, `MIN_HEIGHT`, `DEFAULT_SIZE`, `DEFAULT_FRACTION`
 - **Edges:** `bezierPath`, `anchorOf`, `midpoint`, `edgeEnds`
 - **Presses:** `NOT_A_DRAG`, `startsADrag`
 - **Other:** `createFrameStore`, `validateCanvasProps`, `DEFAULT_FEATURES`, `ITEM_ID_ATTR`, `SWEEPING_CLASS`
