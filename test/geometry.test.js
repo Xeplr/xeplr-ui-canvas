@@ -223,6 +223,28 @@ console.log('\naligning and matching size')
   const tall = matchSize(items, ['a', 'b'], 'height')
   check('same height: the tallest', at(tall, 'a').h === 15 && at(tall, 'a').y === 5)
   check('an unknown dimension: nothing changes', matchSize(items, ['a', 'b'], 'depth') === items)
+
+  // A GROUP is one shape: a tile with a chart laid on it, and one widget beside.
+  const near = (a, b) => Math.abs(a - b) < 1e-9
+  const board = [
+    { id: 'tile', g: 'G', x: 0, y: 0, w: 40, h: 20 },
+    { id: 'chart', g: 'G', x: 20, y: 10, w: 20, h: 10 },
+    { id: 'kpi', x: 60, y: 30, w: 30, h: 40 }
+  ]
+  const groupOf = (i) => i.g
+  const named = ['tile', 'chart', 'kpi']
+  const top2 = alignItems(board, named, 'top', { groupOf })
+  check('a group moves as one: its members keep their places', at(top2, 'tile').y === 0 && at(top2, 'chart').y === 10)
+  check('...and the other shape lines up with the group', at(top2, 'kpi').y === 0)
+  const right2 = alignItems(board, named, 'right', { groupOf })
+  check('aligned right: the group\'s right edge, not each member\'s', at(right2, 'tile').x === 50 && at(right2, 'chart').x === 70 && at(right2, 'kpi').x === 60)
+  const tall2 = matchSize(board, named, 'height', { groupOf })
+  check('same height: the GROUP takes the tallest height', near(at(tall2, 'tile').h, 40) && near(at(tall2, 'chart').h, 20))
+  check('...its members scaled with it, keeping their places', near(at(tall2, 'chart').y, 20) && at(tall2, 'tile').y === 0)
+  check('...the inner chart is not made the tallest height itself', !near(at(tall2, 'chart').h, 40))
+  check('...and widths are untouched', at(tall2, 'chart').w === 20)
+  check('one group alone is one shape: nothing to line up', alignItems(board, ['tile', 'chart'], 'left', { groupOf }) === board)
+  check('a member named alone still moves its whole group', at(alignItems(board, ['chart', 'kpi'], 'left', { groupOf }), 'tile').x === 0 && at(alignItems(board, ['chart', 'kpi'], 'left', { groupOf }), 'kpi').x === 0)
 }
 check('paint order is by z',
   inStackOrder([{ id: 'a', z: 2 }, { id: 'b', z: 0 }]).map((w) => w.id).join() === 'b,a')

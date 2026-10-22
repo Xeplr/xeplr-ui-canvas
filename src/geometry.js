@@ -283,43 +283,86 @@ export function bringToFront(items, id) {
 /** The edges `alignItems` lines items up on. */
 export const ALIGN_EDGES = ['left', 'right', 'top', 'bottom']
 
+const ex = (i) => i.x || 0, ey = (i) => i.y || 0, ew = (i) => i.w || 0, eh = (i) => i.h || 0
+
+// The SHAPES among the named items: each ungrouped item on its own, and each
+// group as one (every member of it, named or not), with the box around it.
+// `groupOf(item)` names an item's group, or nothing.
+function shapesOf(list, ids, groupOf) {
+  const wanted = new Set(ids || [])
+  const key = (item) => (groupOf && groupOf(item)) || null
+  const shapes = new Map()
+  list.forEach((item) => {
+    if (!wanted.has(item.id)) return
+    const k = key(item) ? 'g:' + key(item) : 'i:' + item.id
+    if (!shapes.has(k)) {
+      const members = key(item) ? list.filter((o) => key(o) === key(item)) : [item]
+      const x = Math.min(...members.map(ex)), y = Math.min(...members.map(ey))
+      shapes.set(k, {
+        members,
+        x, y,
+        w: Math.max(...members.map((m) => ex(m) + ew(m))) - x,
+        h: Math.max(...members.map((m) => ey(m) + eh(m))) - y
+      })
+    }
+  })
+  return [...shapes.values()]
+}
+
 /**
- * The items named in `ids`, lined up on one EDGE of the group they make: on
+ * The items named in `ids`, lined up on one EDGE of the set they make: on
  * the leftmost left, the rightmost right, the highest top or the lowest
  * bottom. Sizes never change, only positions; items not named are untouched.
+ *
+ * A GROUP is one shape (`opts.groupOf(item)` → its group, or nothing): it
+ * moves as a whole, its members keeping their places inside it — never lined
+ * up with each other.
+ *
  * Works in any one unit (fractions or pixels), as long as all items share it.
  */
-export function alignItems(items, ids, edge) {
+export function alignItems(items, ids, edge, opts) {
   const list = items || []
-  const wanted = new Set(ids || [])
-  const chosen = list.filter((item) => wanted.has(item.id))
-  if (chosen.length < 2 || ALIGN_EDGES.indexOf(edge) < 0) return list
-  const x = (i) => i.x || 0, y = (i) => i.y || 0, w = (i) => i.w || 0, h = (i) => i.h || 0
-  const target = edge === 'left' ? Math.min(...chosen.map(x))
-    : edge === 'right' ? Math.max(...chosen.map((i) => x(i) + w(i)))
-      : edge === 'top' ? Math.min(...chosen.map(y))
-        : Math.max(...chosen.map((i) => y(i) + h(i)))
+  const shapes = shapesOf(list, ids, opts && opts.groupOf)
+  if (shapes.length < 2 || ALIGN_EDGES.indexOf(edge) < 0) return list
+  const target = edge === 'left' ? Math.min(...shapes.map((s) => s.x))
+    : edge === 'right' ? Math.max(...shapes.map((s) => s.x + s.w))
+      : edge === 'top' ? Math.min(...shapes.map((s) => s.y))
+        : Math.max(...shapes.map((s) => s.y + s.h))
+  const move = new Map()
+  shapes.forEach((s) => {
+    const dx = edge === 'left' ? target - s.x : edge === 'right' ? target - (s.x + s.w) : 0
+    const dy = edge === 'top' ? target - s.y : edge === 'bottom' ? target - (s.y + s.h) : 0
+    s.members.forEach((m) => move.set(m.id, { dx, dy }))
+  })
   return list.map((item) => {
-    if (!wanted.has(item.id)) return item
-    if (edge === 'left') return { ...item, x: target }
-    if (edge === 'right') return { ...item, x: target - w(item) }
-    if (edge === 'top') return { ...item, y: target }
-    return { ...item, y: target - h(item) }
+    const d = move.get(item.id)
+    return d ? { ...item, x: ex(item) + d.dx, y: ey(item) + d.dy } : item
   })
 }
 
 /**
  * The items named in `ids` made the same `width` or `height` — the largest
  * among them, so nothing is squeezed. Each keeps its top-left corner.
+ *
+ * A GROUP is one shape: the GROUP is made that size, its members scaled with
+ * it so they keep their places inside it — not each member made that size.
  */
-export function matchSize(items, ids, dimension) {
+export function matchSize(items, ids, dimension, opts) {
   const list = items || []
-  const wanted = new Set(ids || [])
-  const key = dimension === 'width' ? 'w' : dimension === 'height' ? 'h' : null
-  const chosen = list.filter((item) => wanted.has(item.id))
-  if (!key || chosen.length < 2) return list
-  const size = Math.max(...chosen.map((i) => i[key] || 0))
-  return list.map((item) => (wanted.has(item.id) ? { ...item, [key]: size } : item))
+  const along = dimension === 'width' ? 'w' : dimension === 'height' ? 'h' : null
+  const shapes = shapesOf(list, ids, opts && opts.groupOf)
+  if (!along || shapes.length < 2) return list
+  const size = Math.max(...shapes.map((s) => s[along]))
+  const pos = along === 'w' ? 'x' : 'y'
+  const scaled = new Map()
+  shapes.forEach((s) => {
+    const f = s[along] ? size / s[along] : 1
+    s.members.forEach((m) => scaled.set(m.id, {
+      [pos]: s[pos] + ((m[pos] || 0) - s[pos]) * f,
+      [along]: (m[along] || 0) * f
+    }))
+  })
+  return list.map((item) => (scaled.has(item.id) ? { ...item, ...scaled.get(item.id) } : item))
 }
 
 /** Items in paint order — the one on top renders last. */
