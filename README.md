@@ -177,7 +177,7 @@ Everything is namespaced `.xeplr-canvas-*`, and colours come from the xeplr them
 - **Component:** `XeplrCanvas`
 - **Hooks:** `useCanvasController`, `useCanvasDrag`, `useMarquee`, `useCanvasSize`
 - **Designs:** `CanvasSample`, `DragGuides`, `MarqueeBox`, `ResizeHandles`, `EdgeLayer`
-- **Geometry:** `moveRect`, `resizeRect`, `rectOf`, `pixelRect`, `canvasBounds`, `restack(items, id, move)` (move one item `front`, `forward`, `backward` or `back`; the others keep their order; z renumbered from 0; `STACK_MOVES`), `bringToFront` (= `restack(…, 'front')`), `inStackOrder`, `toFraction`, `toPixels`, `hits`, `overlaps`, `RESIZE_HANDLES`, `GRID`, `SNAP_TOLERANCE`, `MIN_WIDTH`, `MIN_HEIGHT`, `DEFAULT_SIZE`, `DEFAULT_FRACTION`
+- **Geometry:** `moveRect`, `resizeRect`, `rectOf`, `pixelRect`, `canvasBounds`, `restack(items, id, move)` (move one item `front`, `forward`, `backward` or `back`; the others keep their order; z renumbered from 0; `STACK_MOVES`), `bringToFront` (= `restack(…, 'front')`), `alignItems(items, ids, edge)` (line several up on the leftmost left, rightmost right, highest top or lowest bottom; sizes kept; `ALIGN_EDGES`), `matchSize(items, ids, 'width' | 'height')` (all the largest, corners kept), `inStackOrder`, `toFraction`, `toPixels`, `hits`, `overlaps`, `RESIZE_HANDLES`, `GRID`, `SNAP_TOLERANCE`, `MIN_WIDTH`, `MIN_HEIGHT`, `DEFAULT_SIZE`, `DEFAULT_FRACTION`
 - **Edges:** `bezierPath`, `anchorOf`, `midpoint`, `edgeEnds`
 - **Presses:** `NOT_A_DRAG`, `startsADrag`
 - **Other:** `createFrameStore`, `validateCanvasProps`, `DEFAULT_FEATURES`, `ITEM_ID_ATTR`, `SWEEPING_CLASS`

@@ -280,6 +280,48 @@ export function bringToFront(items, id) {
   return restack(items, id, 'front')
 }
 
+/** The edges `alignItems` lines items up on. */
+export const ALIGN_EDGES = ['left', 'right', 'top', 'bottom']
+
+/**
+ * The items named in `ids`, lined up on one EDGE of the group they make: on
+ * the leftmost left, the rightmost right, the highest top or the lowest
+ * bottom. Sizes never change, only positions; items not named are untouched.
+ * Works in any one unit (fractions or pixels), as long as all items share it.
+ */
+export function alignItems(items, ids, edge) {
+  const list = items || []
+  const wanted = new Set(ids || [])
+  const chosen = list.filter((item) => wanted.has(item.id))
+  if (chosen.length < 2 || ALIGN_EDGES.indexOf(edge) < 0) return list
+  const x = (i) => i.x || 0, y = (i) => i.y || 0, w = (i) => i.w || 0, h = (i) => i.h || 0
+  const target = edge === 'left' ? Math.min(...chosen.map(x))
+    : edge === 'right' ? Math.max(...chosen.map((i) => x(i) + w(i)))
+      : edge === 'top' ? Math.min(...chosen.map(y))
+        : Math.max(...chosen.map((i) => y(i) + h(i)))
+  return list.map((item) => {
+    if (!wanted.has(item.id)) return item
+    if (edge === 'left') return { ...item, x: target }
+    if (edge === 'right') return { ...item, x: target - w(item) }
+    if (edge === 'top') return { ...item, y: target }
+    return { ...item, y: target - h(item) }
+  })
+}
+
+/**
+ * The items named in `ids` made the same `width` or `height` — the largest
+ * among them, so nothing is squeezed. Each keeps its top-left corner.
+ */
+export function matchSize(items, ids, dimension) {
+  const list = items || []
+  const wanted = new Set(ids || [])
+  const key = dimension === 'width' ? 'w' : dimension === 'height' ? 'h' : null
+  const chosen = list.filter((item) => wanted.has(item.id))
+  if (!key || chosen.length < 2) return list
+  const size = Math.max(...chosen.map((i) => i[key] || 0))
+  return list.map((item) => (wanted.has(item.id) ? { ...item, [key]: size } : item))
+}
+
 /** Items in paint order — the one on top renders last. */
 export function inStackOrder(items) {
   return [...(items || [])].sort((a, b) => (a.z || 0) - (b.z || 0))

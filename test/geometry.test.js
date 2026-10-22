@@ -6,7 +6,7 @@
 // you meant it and stay out of the way when you didn't.
 import { GRID,
   moveRect, resizeRect, rectOf, canvasBounds,
-  bringToFront, restack, STACK_MOVES, inStackOrder, MIN_WIDTH, MIN_HEIGHT, SNAP_TOLERANCE,
+  bringToFront, restack, STACK_MOVES, alignItems, ALIGN_EDGES, matchSize, inStackOrder, MIN_WIDTH, MIN_HEIGHT, SNAP_TOLERANCE,
   toFraction, toPixels, DEFAULT_FRACTION, hits
 } from '../src/geometry.js'
 import { anchorOf, bezierPath, midpoint, edgeEnds } from '../src/edges.js'
@@ -202,6 +202,27 @@ console.log('\nstacking')
   check('items come back in the order given', restack(four, 'b', 'front').map((w) => w.id).join() === 'a,b,c,d')
   check('an unknown move changes nothing', restack(four, 'b', 'sideways') === four)
   check('equal z values keep the order given', order(restack([{ id: 'x' }, { id: 'y' }, { id: 'z' }], 'z', 'backward')) === 'x,z,y')
+}
+console.log('\naligning and matching size')
+{
+  const items = [{ id: 'a', x: 10, y: 5, w: 20, h: 10 }, { id: 'b', x: 40, y: 20, w: 30, h: 15 }, { id: 'c', x: 0, y: 0, w: 5, h: 5 }]
+  const at = (list, id) => list.find((i) => i.id === id)
+  check('the edges', ALIGN_EDGES.join() === 'left,right,top,bottom')
+  const left = alignItems(items, ['a', 'b'], 'left')
+  check('left: on the leftmost left', at(left, 'a').x === 10 && at(left, 'b').x === 10)
+  const right = alignItems(items, ['a', 'b'], 'right')
+  check('right: on the rightmost right, sizes kept', at(right, 'a').x + 20 === 70 && at(right, 'b').x === 40 && at(right, 'a').w === 20)
+  const top = alignItems(items, ['a', 'b'], 'top')
+  check('top: on the highest top', at(top, 'a').y === 5 && at(top, 'b').y === 5)
+  const bottom = alignItems(items, ['a', 'b'], 'bottom')
+  check('bottom: on the lowest bottom', at(bottom, 'a').y + 10 === 35 && at(bottom, 'b').y === 20)
+  check('items not named are untouched', at(left, 'c') === items[2])
+  check('one item, or an unknown edge: nothing moves', alignItems(items, ['a'], 'left') === items && alignItems(items, ['a', 'b'], 'middle') === items)
+  const wide = matchSize(items, ['a', 'b'], 'width')
+  check('same width: the widest, corners kept', at(wide, 'a').w === 30 && at(wide, 'b').w === 30 && at(wide, 'a').x === 10)
+  const tall = matchSize(items, ['a', 'b'], 'height')
+  check('same height: the tallest', at(tall, 'a').h === 15 && at(tall, 'a').y === 5)
+  check('an unknown dimension: nothing changes', matchSize(items, ['a', 'b'], 'depth') === items)
 }
 check('paint order is by z',
   inStackOrder([{ id: 'a', z: 2 }, { id: 'b', z: 0 }]).map((w) => w.id).join() === 'b,a')
